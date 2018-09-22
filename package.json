@@ -1,0 +1,12 @@
+{
+  "name": "eutambem",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:eutambem/eutambem-backend.git",
+  "author": "Eu Tambem",
+  "license": "MIT",
+  "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "express": "^4.16.3"
+  }
+}
