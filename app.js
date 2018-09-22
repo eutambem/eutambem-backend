@@ -1,7 +1,10 @@
 'use strict'
 const express = require('express');
 const app = express();
+const constants = require('./domain/constants.json');
 
-app.get('/teste', (req, res) => res.send('Hello world!'));
+var constantsRouter = express.Router();
+constantsRouter.get('/', (req, res) => res.json(constants));
+app.use('/constants', constantsRouter);
 
 module.exports = app;
