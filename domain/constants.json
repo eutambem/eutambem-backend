@@ -145,7 +145,7 @@
         ]
      },
      {  
-        "FOLLOWUP_ACTIONS_OPTIONS":[  
+        "followup_actions_options":[
            {  
               "value":"talkedToAccountable",
               "label":"Falei com algum Responsável (RH, Superior direto, etc)"
