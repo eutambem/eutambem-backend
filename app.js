@@ -12,7 +12,7 @@ app.get('/health-check', function(req, res) { res.send('It\'s alive') });
 app.get('/db', function(req, res) {
     var mysql = require('mysql');
     var connection = mysql.createConnection({
-        host : 'eutambem-db-cluster.cluster-cta4f3s1nekd.us-east-1.rds.amazonaws.com',
+        host : 'eutambem-cluster-dev.cluster-cta4f3s1nekd.us-east-1.rds.amazonaws.com',
         user : 'admin',
         password : 'zQ4hMn7GX3',
         database : 'eutbm'
