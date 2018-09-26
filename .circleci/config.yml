@@ -38,7 +38,7 @@ jobs:
             at: .
         - run:
             name: Deploy to S3
-            command: aws s3 cp eutambem.zip s3://eutambem-src/v0.0.1/eutambem.zip
+            command: aws s3 cp eutambem.zip s3://eutambem-src/${CIRCLE_BUILD_NUM}/eutambem.zip
 
 workflows:
   version: 2
