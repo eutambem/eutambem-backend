@@ -39,6 +39,10 @@ jobs:
         - run:
             name: Deploy to S3
             command: aws s3 cp eutambem.zip s3://eutambem-src/${CIRCLE_BUILD_NUM}/eutambem.zip
+        - run:
+            name: Trigger deployment pipeline (eutambem-serverless)
+            command: 'curl -X POST -u $CIRCLE_CI_API_TOKEN: https://circleci.com/api/v1.1/project/github/eutambem/eutambem-serverless/build'
+
 
 workflows:
   version: 2
