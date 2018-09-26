@@ -26,7 +26,7 @@ jobs:
           root: .
           paths:
             - eutambem.zip
-  deploy:
+  upload:
       docker:
         - image: circleci/python:2.7-jessie
       working_directory: ~/circleci-docs
@@ -37,7 +37,7 @@ jobs:
         - attach_workspace:
             at: .
         - run:
-            name: Deploy to S3
+            name: Upload to S3
             command: aws s3 cp eutambem.zip s3://eutambem-src/${CIRCLE_BUILD_NUM}/eutambem.zip
         - run:
             name: Trigger deployment pipeline (eutambem-serverless)
@@ -46,10 +46,10 @@ jobs:
 
 workflows:
   version: 2
-  build-deploy:
+  build-upload:
     jobs:
       - build
-      - deploy:
+      - upload:
           requires:
             - build
           filters:
