@@ -5,7 +5,7 @@ const constants = require('./domain/constants.json');
 
 var constantsRouter = express.Router();
 constantsRouter.get('/', (req, res) => res.json(constants));
-app.use('/constants', constantsRouter);
+app.use('/report/constants', constantsRouter);
 
 app.get('/health-check', function(req, res) { res.send('It\'s alive') });
 
