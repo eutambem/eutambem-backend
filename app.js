@@ -2,32 +2,45 @@
 const express = require('express');
 const app = express();
 const constants = require('./domain/constants.json');
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.get('/report/constants', (req, res) => res.json(constants));
 
 app.get('/health-check', (req, res) => res.send('It\'s alive'));
 
 app.post('/report/save', function(req, res) {
-    const report = req.body;
+    const MongoClient = require('mongodb').MongoClient;
+    const url = "mongodb://127.0.0.1:27017";
+    const reportObj = req.body;
+    console.log(reportObj);
 
-    res.send('Vai salvar no banco um dia');
+    MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
+        if (err) throw err;
+        const dbo = db.db("eutambem");
+        dbo.collection("report").insertOne(reportObj, function(err, resdb) {
+          if (err) throw err;
+          res.send('1 report inserted');
+          db.close();
+        });
+    });
 });
 
-app.get('/db', function(req, res) {
-    var mysql = require('mysql');
-    var connection = mysql.createConnection({
-        host : 'eutambem-cluster-dev.cluster-cta4f3s1nekd.us-east-1.rds.amazonaws.com',
-        user : 'admin',
-        password : 'zQ4hMn7GX3',
-        database : 'eutbm'
+app.get('/report/list', function(req, res) {
+    const MongoClient = require('mongodb').MongoClient;
+    const url = "mongodb://127.0.0.1:27017";
+
+    MongoClient.connect(url, function(err, db) {
+      if (err) throw err;
+      const dbo = db.db("eutambem");
+      dbo.collection("report").find({}).toArray(function(err, result) {
+        if (err) throw err;
+        res.send({list : result});
+        db.close();
+      });
     });
-     connection.query('select * from livros',function(err, results) {
-        if(err) {
-            console.log(err);
-        }
-        res.send({lista : results});
-     });
-     connection.end();
-    });
+});
 
 module.exports = app;
