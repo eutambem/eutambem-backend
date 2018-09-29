@@ -5,7 +5,7 @@ const constants = require('./domain/constants.json');
 
 app.get('/report/constants', (req, res) => res.json(constants));
 
-app.get('/health-check', function(req, res) { res.send('It\'s alive') });
+app.get('/health-check', (req, res) => res.send('It\'s alive'));
 
 app.get('/db', function(req, res) {
     var mysql = require('mysql');
