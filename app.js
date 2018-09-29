@@ -7,6 +7,12 @@ app.get('/report/constants', (req, res) => res.json(constants));
 
 app.get('/health-check', (req, res) => res.send('It\'s alive'));
 
+app.post('/report/save', function(req, res) {
+    const report = req.body;
+
+    res.send('Vai salvar no banco um dia');
+});
+
 app.get('/db', function(req, res) {
     var mysql = require('mysql');
     var connection = mysql.createConnection({
