@@ -3,9 +3,7 @@ const express = require('express');
 const app = express();
 const constants = require('./domain/constants.json');
 
-var constantsRouter = express.Router();
-constantsRouter.get('/', (req, res) => res.json(constants));
-app.use('/report/constants', constantsRouter);
+app.get('/report/constants', (req, res) => res.json(constants));
 
 app.get('/health-check', function(req, res) { res.send('It\'s alive') });
 
