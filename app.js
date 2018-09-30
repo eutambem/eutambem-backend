@@ -32,7 +32,7 @@ app.get('/report/list', function(req, res) {
     const MongoClient = require('mongodb').MongoClient;
     const uri = `mongodb://admin:H3]G8*LXcH66e&$hrLsA@eutambem-shard-00-00-qrwe2.mongodb.net:27017,eutambem-shard-00-01-qrwe2.mongodb.net:27017,eutambem-shard-00-02-qrwe2.mongodb.net:27017/test?replicaSet=eutambem-shard-0&ssl=true&authSource=admin`;
 
-    MongoClient.connect(uri, function(err, db) {
+    MongoClient.connect(uri, { useNewUrlParser: true }, function(err, db) {
       if (err) throw err;
       const dbo = db.db("eutambem");
       dbo.collection("report").find({}).toArray(function(err, result) {
