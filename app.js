@@ -1,11 +1,6 @@
 'use strict'
-const express = require('express');
-const app = express();
-const constants = require('./domain/constants.json');
-const bodyParser = require('body-parser');
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+var app = require('./config/express')();
+const constants = require('./app/domain/constants.json');
 
 app.get('/report/constants', (req, res) => res.json(constants));
 
