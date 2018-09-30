@@ -11,13 +11,13 @@ app.get('/report/constants', (req, res) => res.json(constants));
 
 app.get('/health-check', (req, res) => res.send('It\'s alive'));
 
-app.post('/report/save', function(req, res) {
+app.post('/report', function(req, res) {
     const MongoClient = require('mongodb').MongoClient;
-    const url = "mongodb://127.0.0.1:27017";
+    const uri = `mongodb://admin:H3]G8*LXcH66e&$hrLsA@eutambem-shard-00-00-qrwe2.mongodb.net:27017,eutambem-shard-00-01-qrwe2.mongodb.net:27017,eutambem-shard-00-02-qrwe2.mongodb.net:27017/test?replicaSet=eutambem-shard-0&ssl=true&authSource=admin`;
     const reportObj = req.body;
     console.log(reportObj);
 
-    MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
+    MongoClient.connect(uri, { useNewUrlParser: true }, function(err, db) {
         if (err) throw err;
         const dbo = db.db("eutambem");
         dbo.collection("report").insertOne(reportObj, function(err, resdb) {
@@ -30,9 +30,9 @@ app.post('/report/save', function(req, res) {
 
 app.get('/report/list', function(req, res) {
     const MongoClient = require('mongodb').MongoClient;
-    const url = "mongodb://127.0.0.1:27017";
+    const uri = `mongodb://admin:H3]G8*LXcH66e&$hrLsA@eutambem-shard-00-00-qrwe2.mongodb.net:27017,eutambem-shard-00-01-qrwe2.mongodb.net:27017,eutambem-shard-00-02-qrwe2.mongodb.net:27017/test?replicaSet=eutambem-shard-0&ssl=true&authSource=admin`;
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(uri, function(err, db) {
       if (err) throw err;
       const dbo = db.db("eutambem");
       dbo.collection("report").find({}).toArray(function(err, result) {
