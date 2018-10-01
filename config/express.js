@@ -1,13 +1,15 @@
 var express = require('express');
-var load = require('express-load');
+var consing = require('consign');
 const bodyParser = require('body-parser');
 
-module.exports = function(){
+module.exports = function() {
     var app = express();
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({extended: true}));
 
-    load('domain', {cwd: 'app'})
+    consing({cwd: 'app', verbose: false})
+        .include('models')
+        .then('routes')
         .then('db')
         .into(app);
 
