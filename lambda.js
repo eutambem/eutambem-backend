@@ -1,6 +1,7 @@
 'use strict'
 const awsServerlessExpress = require('aws-serverless-express');
 const app = require('./app');
+const connection = app.db.connectionFactory;
 
 const binaryMimeTypes = [
 	'application/octet-stream',
@@ -12,7 +13,7 @@ const binaryMimeTypes = [
 	'image/svg+xml'
 ];
 
-mongoUtil.connectToServer(function(err, db) {
-const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes);
-exports.handler = (event, context) => awsServerlessExpress.proxy(server, event, context);
+connection.connectToServer(function(err, db) {
+	const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes);
+	exports.handler = (event, context) => awsServerlessExpress.proxy(server, event, context);
 });
