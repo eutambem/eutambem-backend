@@ -13,7 +13,10 @@ const binaryMimeTypes = [
 	'image/svg+xml'
 ];
 
-connection.connectToServer(function(err, db) {
-	const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes);
-	exports.handler = (event, context) => awsServerlessExpress.proxy(server, event, context);
-});
+const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes);
+exports.handler = (event, context) => {
+	connection.getMongoDb().then(dbs => {
+		app.locals.dbs = dbs;
+		awsServerlessExpress.proxy(server, event, context);
+	  })
+}

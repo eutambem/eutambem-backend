@@ -1,12 +1,13 @@
 'use strict'
 const app = require('./app');
 const connection = app.db.connectionFactory;
-
 const port = 3000;
 
-connection.connectToServer(function(err, db) {
-  console.log("Connected to database");
-  app.listen(port, () =>
-    console.log(`Server is listening on port ${port}.`)
-  );
-});
+connection.getMongoDb().then(dbs => {
+  app.locals.dbs = dbs;
+  app.listen(port, () => console.log('Listening on port ' + port))
+}).catch(err => {
+  console.error('Failed to make all database connections!')
+  console.error(err)
+  process.exit(1)
+})
