@@ -13,7 +13,6 @@ module.exports = {
     console.log('Init the new connection pool');
     return mongoose.connect(uri, { poolSize: 10, useNewUrlParser: true })
         .then(dbConnPool => {
-                            mongoose.Promise = global.Promise;
                             mongoDbConnectionPool = dbConnPool;
                             return mongoose.connection;
                           });
