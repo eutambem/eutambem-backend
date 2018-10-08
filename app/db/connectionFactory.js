@@ -1,21 +1,26 @@
 'use strict';
-const MongoClient = require('mongodb').MongoClient;
+const mongoose = require('mongoose');
 const uri = process.env.MONGO_CONN;
 let mongoDbConnectionPool = null;
-const mongoDbName = "eutambem";
 
 module.exports = {
   getMongoDb: function() {
-      if (mongoDbConnectionPool && mongoDbConnectionPool.isConnected(mongoDbName)) {
+      if (mongoDbConnectionPool && isConnected(mongoDbConnectionPool)) {
         console.log('Reusing the connection from pool');
-        return Promise.resolve(mongoDbConnectionPool.db(mongoDbName));
+        return Promise.resolve(mongoose.connection);
     }
 
     console.log('Init the new connection pool');
-    return MongoClient.connect(uri, { poolSize: 10, useNewUrlParser: true })
+    return mongoose.connect(uri, { poolSize: 10, useNewUrlParser: true })
         .then(dbConnPool => {
+                            mongoose.Promise = global.Promise;
                             mongoDbConnectionPool = dbConnPool;
-                            return mongoDbConnectionPool.db(mongoDbName);
+                            return mongoose.connection;
                           });
     }
-  };
+};
+
+function isConnected(mongoDbConnectionPool) {
+  const mongoState = mongoDbConnectionPool.connection.readyState;
+  return (mongoState == 1) ? true : false;
+}
