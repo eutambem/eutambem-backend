@@ -21,5 +21,5 @@ module.exports = {
 
 function isConnected(mongoDbConnectionPool) {
   const mongoState = mongoDbConnectionPool.connection.readyState;
-  return (mongoState == 1) ? true : false;
+  return (mongoState == 1);
 }
