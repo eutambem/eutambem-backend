@@ -145,6 +145,24 @@
         "value":"policeReport",
         "label":"Fiz um Boletim de Ocorrência"
       }
+    ],
+    "sexual_orientation": [
+      {
+        "value":"homosexual",
+        "label":"Homossexual"
+      },
+      {
+        "value":"bisexual",
+        "label":"Bissexual"
+      },
+      {
+        "value":"straight",
+        "label":"Heterossexual"
+      },
+      {
+        "value":"other",
+        "label":"Outro"
+      }
     ]
   }
 }
