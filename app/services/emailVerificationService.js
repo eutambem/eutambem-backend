@@ -13,6 +13,7 @@ class EmailVerificationService {
         const to = report.email;
         const from = this.from;
         const token = this.createToken(report);
+        const verificationURL = this.verificationURL(token);
 
         this.saveToken(token, report, (err) => {
             if (err) {
@@ -24,7 +25,7 @@ class EmailVerificationService {
                 to: to,
                 from: from,
                 subject: 'Verifique seu email pra enviar seu relato',
-                message: 'Olá mundo',
+                message: `Olá,\n\nObrigado por enviar seu relato.\n\nPra evitarmos spam, pedimos para que por favor verifique seu email clicando no link abaixo:\n${verificationURL}\n\nEquipe EuTambem`,
             }, callback);
         });
     }
@@ -39,6 +40,10 @@ class EmailVerificationService {
     createToken(report) {
         const tokenValue = report._id + Date.now();
         return crypto.createHash('sha256').update(tokenValue, 'utf8').digest('hex');
+    }
+
+    verificationURL(token) {
+        return `${process.env.BASE_URL}/verify?token=${token}`;
     }
 }
 

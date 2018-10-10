@@ -12,6 +12,9 @@ describe('EmailVerificationService', () => {
 
     beforeEach(() => {
         process.env.EMAIL_FROM_ADDRESS = 'no-reply@eutambem.org';
+        process.env.BASE_URL = 'https://eutambem.org';
+        Date.now = jest.fn(() => 1539197013420);
+
         mockClient = { sendEmail: jest.fn((options, callback) => { callback(null); }) };
         mockEmailDriver = { createClient: jest.fn(() => mockClient) };
         mockDbCollection = { insertOne: jest.fn((doc, callback) => { callback(null); }) };
@@ -19,7 +22,6 @@ describe('EmailVerificationService', () => {
         service = new EmailVerificationService({ emailDriver: mockEmailDriver, db: mockDb });
         report = { _id: '123456', email: 'user@example.com' };
         callback = jest.fn();
-        Date.now = jest.fn(() => 1539197013420);
     });
 
     it('should send verification email with the correct parameters', () => {
@@ -71,5 +73,14 @@ describe('EmailVerificationService', () => {
 
     it('should create a token from the report\'s id and current date', () => {
         expect(service.createToken(report)).toEqual('cbfc7270b782affe5e2692621910f0c555f7d2800be536fd03da3d82361dabd1');
+    });
+
+    it('should send the link to verify email containing the token', () => {
+        const token = service.createToken(report);
+
+        service.sendVerificationEmail(report, callback);
+        const email = mockClient.sendEmail.mock.calls[0][0];
+
+        expect(email.message).toContain('https://eutambem.org/verify?token=' + token);
     });
 });
