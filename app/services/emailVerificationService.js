@@ -31,6 +31,23 @@ class EmailVerificationService {
         });
     }
 
+    verify(token, callback) {
+        this.getReportFromToken(token, (err, tokenObj) => {
+
+        });
+    }
+
+    getReportFromToken(token, callback) {
+         this.db.collection('validation_token').find({ token: token }, (err, tokenObj) => {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            this.db.collection('report').find({ _id: tokenObj.report_id }, callback);
+         });
+    }
+
     saveToken(token, report, callback) {
         this.db.collection('validation_token').insertOne({
             report_id: report._id,

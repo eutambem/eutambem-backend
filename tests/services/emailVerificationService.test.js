@@ -83,4 +83,60 @@ describe('EmailVerificationService', () => {
 
         expect(email.message).toContain('https://eutambem.org/verify?token=' + token);
     });
+
+    // verification
+    describe('When verifying a token', () => {
+        const mockTokenObject = {
+            '_id': '123423212312',
+            'report_id': '123456',
+            'token': 'abc123',
+            'date': new Date(1539197013420),
+        };
+
+        it('should get the report by the verification token', () => {
+            mockDbCollection = { find: jest.fn((params, callback) => {
+                if (params.token == 'abc123') {
+                    callback(null, mockTokenObject);
+                    return;
+                }
+                if (params._id == '123456') {
+                    callback(null, report);
+                }
+            }) };
+
+            service.getReportFromToken('abc123', callback);
+
+            expect(mockDb.collection).toBeCalledWith('validation_token');
+            expect(mockDbCollection.find).toBeCalledWith({ token: 'abc123' }, expect.anything());
+            expect(mockDb.collection).toBeCalledWith('report');
+            expect(mockDbCollection.find).toBeCalledWith({ _id: '123456' }, expect.anything());
+            expect(callback).toBeCalledWith(null, report);
+        });
+
+        it('should return an error when it cannot find the verification token', () => {
+            mockDbCollection = { find: jest.fn((params, callback) => {
+                if (params.token == 'abc123') callback('error');
+            }) };
+
+            service.getReportFromToken('abc123', callback);
+
+            expect(callback).toBeCalledWith('error');
+        });
+
+        it('should return an error when it cannot find the report', () => {
+            mockDbCollection = { find: jest.fn((params, callback) => {
+                if (params.token == 'abc123') {
+                    callback(null, mockTokenObject);
+                    return;
+                }
+                if (params._id == '123456') {
+                    callback('error');
+                }
+            }) };
+
+            service.getReportFromToken('abc123', callback);
+
+            expect(callback).toBeCalledWith('error');
+        });
+    });
 });
