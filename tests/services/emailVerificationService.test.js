@@ -30,7 +30,7 @@ describe('EmailVerificationService', () => {
         expect(mockEmailDriver.createClient).toBeCalled();
         expect(mockClient.sendEmail).toBeCalledWith({
             to: 'user@example.com',
-            from: 'no-reply@eutambem.org',
+            from: 'EuTambem <no-reply@eutambem.org>',
             subject: 'Verifique seu endereço de e-mail',
             message: expect.anything(),
         }, expect.anything());

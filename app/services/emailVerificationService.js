@@ -7,7 +7,7 @@ class EmailVerificationService {
         this.emailDriver = options.emailDriver;
         this.db = options.db;
         this.baseURL = options.baseURL;
-        this.from = process.env.EMAIL_FROM_ADDRESS;
+        this.from = `EuTambem <${process.env.EMAIL_FROM_ADDRESS}>`;
     }
 
     sendVerificationEmail(report, callback) {
