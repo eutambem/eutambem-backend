@@ -33,27 +33,46 @@ class EmailVerificationService {
 
     verify(token, callback) {
         this.getReportFromToken(token, (err, report, tokenObj) => {
-            this.updateReportAsVerified(report, (err) => {
+            if (err) {
+                callback(err);
+                return;
+            }
+
+            this.updateReportAsVerified(report, (err, res) => {
+                if (err) {
+                    callback(err);
+                    return;
+                }
+
                 this.removeToken(tokenObj, callback);
             });
         });
     }
 
     getReportFromToken(token, callback) {
-         this.db.collection('validation_token').find({ token: token }, (err, tokenObj) => {
-            if (err) {
-                callback(err);
+         this.db.collection('validation_token').findOne({ token: token }, (err, tokenObj) => {
+            if (err || !tokenObj) {
+                callback(err || 'Validation token not found');
                 return;
             }
 
-            this.db.collection('report').find({ _id: tokenObj.report_id }, (err, report) => {
+            this.db.collection('report').findOne({ _id: tokenObj.report_id }, (err, report) => {
+                if (err || !report) {
+                    callback(err || 'Report not found');
+                    return;
+                }
                 callback(err, report, tokenObj);
             });
          });
     }
 
     updateReportAsVerified(report, callback) {
-        this.db.collection('report').save({ ...report, emailVerified: true }, callback);
+        this.db.collection('report').updateOne(
+            { _id: report._id },
+            { "$set": { emailVerified: true } },
+            { },
+            callback,
+        );
     }
 
     saveToken(token, report, callback) {
@@ -65,7 +84,7 @@ class EmailVerificationService {
     }
 
     removeToken(token, callback) {
-        this.db.collection('validation_token').remove(token, callback);
+        this.db.collection('validation_token').deleteOne({ _id: token._id }, callback);
     }
 
     createToken(report) {
