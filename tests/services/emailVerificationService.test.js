@@ -120,17 +120,19 @@ describe('EmailVerificationService', () => {
         });
 
         it('should return an error when it cannot find the verification token', () => {
-            mockDbCollection = { find: jest.fn((params, callback) => {
+            mockDbCollection.find = jest.fn((params, callback) => {
                 if (params.token == 'abc123') callback('error');
-            }) };
+            });
 
             service.getReportFromToken('abc123', callback);
 
+            expect(mockDbCollection.save).not.toBeCalled();
+            expect(mockDbCollection.remove).not.toBeCalled();
             expect(callback).toBeCalledWith('error');
         });
 
         it('should return an error when it cannot find the report', () => {
-            mockDbCollection = { find: jest.fn((params, callback) => {
+            mockDbCollection.find = jest.fn((params, callback) => {
                 if (params.token == 'abc123') {
                     callback(null, mockTokenObject);
                     return;
@@ -138,10 +140,12 @@ describe('EmailVerificationService', () => {
                 if (params._id == '123456') {
                     callback('error');
                 }
-            }) };
+            });
 
             service.getReportFromToken('abc123', callback);
 
+            expect(mockDbCollection.save).not.toBeCalled();
+            expect(mockDbCollection.remove).not.toBeCalled();
             expect(callback).toBeCalledWith('error', undefined, mockTokenObject);
         });
 
