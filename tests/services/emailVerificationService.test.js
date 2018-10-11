@@ -12,14 +12,13 @@ describe('EmailVerificationService', () => {
 
     beforeEach(() => {
         process.env.EMAIL_FROM_ADDRESS = 'no-reply@eutambem.org';
-        process.env.BASE_URL = 'https://eutambem.org';
         Date.now = jest.fn(() => 1539197013420);
 
         mockClient = { sendEmail: jest.fn((options, callback) => { callback(null); }) };
         mockEmailDriver = { createClient: jest.fn(() => mockClient) };
         mockDbCollection = { insertOne: jest.fn((doc, callback) => { callback(null); }) };
         mockDb = { collection: jest.fn(() => mockDbCollection) };
-        service = new EmailVerificationService({ emailDriver: mockEmailDriver, db: mockDb });
+        service = new EmailVerificationService({ emailDriver: mockEmailDriver, db: mockDb, baseURL: 'https://eutambem.org' });
         report = { _id: '123456', email: 'user@example.com' };
         callback = jest.fn();
     });
@@ -31,7 +30,7 @@ describe('EmailVerificationService', () => {
         expect(mockClient.sendEmail).toBeCalledWith({
             to: 'user@example.com',
             from: 'no-reply@eutambem.org',
-            subject: 'Verifique seu email pra enviar seu relato',
+            subject: 'Verifique seu endereço de e-mail',
             message: expect.anything(),
         }, expect.anything());
     });

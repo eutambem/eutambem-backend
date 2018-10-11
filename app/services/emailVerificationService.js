@@ -6,6 +6,7 @@ class EmailVerificationService {
         if (!options.emailDriver) options.emailDriver = ses;
         this.emailDriver = options.emailDriver;
         this.db = options.db;
+        this.baseURL = options.baseURL;
         this.from = process.env.EMAIL_FROM_ADDRESS;
     }
 
@@ -24,8 +25,8 @@ class EmailVerificationService {
             this.emailDriver.createClient().sendEmail({
                 to: to,
                 from: from,
-                subject: 'Verifique seu email pra enviar seu relato',
-                message: `Olá,\n\nObrigado por enviar seu relato.\n\nPra evitarmos spam, pedimos para que por favor verifique seu email clicando no link abaixo:\n${verificationURL}\n\nEquipe EuTambem`,
+                subject: 'Verifique seu endereço de e-mail',
+                message: `Olá,<br><br>Obrigado por enviar seu relato.<br><br>Para evitarmos spam, pedimos que por favor verifique seu email clicando <a href="${verificationURL}">aqui</a>.<br><br>Equipe EuTambem`,
             }, callback);
         });
     }
@@ -43,7 +44,7 @@ class EmailVerificationService {
     }
 
     verificationURL(token) {
-        return `${process.env.BASE_URL}/verify?token=${token}`;
+        return `${this.baseURL}/verify?token=${token}`;
     }
 }
 
