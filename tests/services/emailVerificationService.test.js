@@ -105,6 +105,7 @@ describe('EmailVerificationService', () => {
                     }
                 }),
                 save: jest.fn((doc, callback) => { callback(null); }),
+                remove: jest.fn((doc, callback) => { callback(null); }),
             };
         });
 
@@ -115,7 +116,7 @@ describe('EmailVerificationService', () => {
             expect(mockDbCollection.find).toBeCalledWith({ token: 'abc123' }, expect.anything());
             expect(mockDb.collection).toBeCalledWith('report');
             expect(mockDbCollection.find).toBeCalledWith({ _id: '123456' }, expect.anything());
-            expect(callback).toBeCalledWith(null, report);
+            expect(callback).toBeCalledWith(null, report, mockTokenObject);
         });
 
         it('should return an error when it cannot find the verification token', () => {
@@ -141,7 +142,7 @@ describe('EmailVerificationService', () => {
 
             service.getReportFromToken('abc123', callback);
 
-            expect(callback).toBeCalledWith('error');
+            expect(callback).toBeCalledWith('error', undefined, mockTokenObject);
         });
 
         it('should update the report with the email verified parameter', () => {
@@ -150,6 +151,13 @@ describe('EmailVerificationService', () => {
             expect(mockDb.collection).toBeCalledWith('report');
             expect(mockDbCollection.save).toBeCalledWith({ ...report, emailVerified: true }, expect.anything());
             expect(callback).toBeCalledWith(null);
+        });
+
+        it('should delete the verification token', () => {
+            service.verify('abc123', callback);
+
+            expect(mockDb.collection).toBeCalledWith('validation_token');
+            expect(mockDbCollection.remove).toBeCalledWith(mockTokenObject, expect.anything());
         });
     });
 });

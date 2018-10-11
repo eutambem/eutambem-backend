@@ -32,8 +32,10 @@ class EmailVerificationService {
     }
 
     verify(token, callback) {
-        this.getReportFromToken(token, (err, report) => {
-            this.updateReportAsVerified(report, callback);
+        this.getReportFromToken(token, (err, report, tokenObj) => {
+            this.updateReportAsVerified(report, (err) => {
+                this.removeToken(tokenObj, callback);
+            });
         });
     }
 
@@ -44,7 +46,9 @@ class EmailVerificationService {
                 return;
             }
 
-            this.db.collection('report').find({ _id: tokenObj.report_id }, callback);
+            this.db.collection('report').find({ _id: tokenObj.report_id }, (err, report) => {
+                callback(err, report, tokenObj);
+            });
          });
     }
 
@@ -58,6 +62,10 @@ class EmailVerificationService {
             token: token,
             date: new Date(Date.now()),
         }, callback);
+    }
+
+    removeToken(token, callback) {
+        this.db.collection('validation_token').remove(token, callback);
     }
 
     createToken(report) {
