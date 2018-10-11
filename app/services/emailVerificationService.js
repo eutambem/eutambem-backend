@@ -35,6 +35,7 @@ class EmailVerificationService {
         this.db.collection('validation_token').insertOne({
             report_id: report._id,
             token: token,
+            date: new Date(Date.now()),
         }, callback);
     }
 

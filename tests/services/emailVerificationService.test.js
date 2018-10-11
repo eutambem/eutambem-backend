@@ -58,7 +58,7 @@ describe('EmailVerificationService', () => {
         expect(callback).toBeCalledWith('email_error');
     });
 
-    it('should store a validation token in the database', () => {
+    it('should store a validation token in the database with the report id and date', () => {
         const token = service.createToken(report);
 
         service.sendVerificationEmail(report, callback);
@@ -67,6 +67,7 @@ describe('EmailVerificationService', () => {
         expect(mockDbCollection.insertOne).toBeCalledWith({
             'report_id': '123456',
             'token': token,
+            'date': new Date(1539197013420),
         }, expect.anything());
     });
 
