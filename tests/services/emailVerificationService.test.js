@@ -93,17 +93,22 @@ describe('EmailVerificationService', () => {
             'date': new Date(1539197013420),
         };
 
-        it('should get the report by the verification token', () => {
-            mockDbCollection = { find: jest.fn((params, callback) => {
-                if (params.token == 'abc123') {
-                    callback(null, mockTokenObject);
-                    return;
-                }
-                if (params._id == '123456') {
-                    callback(null, report);
-                }
-            }) };
+        beforeEach(() => {
+            mockDbCollection = {
+                find: jest.fn((params, callback) => {
+                    if (params.token == 'abc123') {
+                        callback(null, mockTokenObject);
+                        return;
+                    }
+                    if (params._id == '123456') {
+                        callback(null, report);
+                    }
+                }),
+                save: jest.fn((doc, callback) => { callback(null); }),
+            };
+        });
 
+        it('should get the report by the verification token', () => {
             service.getReportFromToken('abc123', callback);
 
             expect(mockDb.collection).toBeCalledWith('validation_token');
@@ -137,6 +142,14 @@ describe('EmailVerificationService', () => {
             service.getReportFromToken('abc123', callback);
 
             expect(callback).toBeCalledWith('error');
+        });
+
+        it('should update the report with the email verified parameter', () => {
+            service.verify('abc123', callback);
+
+            expect(mockDb.collection).toBeCalledWith('report');
+            expect(mockDbCollection.save).toBeCalledWith({ ...report, emailVerified: true }, expect.anything());
+            expect(callback).toBeCalledWith(null);
         });
     });
 });

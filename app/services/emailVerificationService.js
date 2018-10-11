@@ -32,8 +32,8 @@ class EmailVerificationService {
     }
 
     verify(token, callback) {
-        this.getReportFromToken(token, (err, tokenObj) => {
-
+        this.getReportFromToken(token, (err, report) => {
+            this.updateReportAsVerified(report, callback);
         });
     }
 
@@ -46,6 +46,10 @@ class EmailVerificationService {
 
             this.db.collection('report').find({ _id: tokenObj.report_id }, callback);
          });
+    }
+
+    updateReportAsVerified(report, callback) {
+        this.db.collection('report').save({ ...report, emailVerified: true }, callback);
     }
 
     saveToken(token, report, callback) {
