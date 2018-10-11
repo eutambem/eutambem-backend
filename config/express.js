@@ -9,8 +9,7 @@ module.exports = function() {
     app.use(bodyParser.urlencoded({extended: true}));
 
     consing({cwd: 'app', verbose: false})
-        .include('models')
-        .then('routes')
+        .include('routes')
         .then('db')
         .into(app);
 
