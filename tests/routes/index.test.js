@@ -1,8 +1,7 @@
 const supertest = require('supertest');
-const chai = require('chai');
 const app = require('../../app');
 const request = supertest(app);
-const expect = chai.expect;
+const expect = require('chai').expect;
 
 describe("Routes: Index", () => {
     describe("GET /", () => {

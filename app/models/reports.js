@@ -1,15 +1,15 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const establishmentSchema = new Schema({ value: String, label: String });
+const followupActions = new Schema({ action: String });
 
 const reportSchema = new Schema({
-    establishment: {
-        value: String,
-        label: String
-    },
+    establishment: { type: establishmentSchema, required: true },
     harassmentType: { type: String, required: true },
     description: { type: String, required: true },
     date: { type: Date, required: true },
-    followupActions: [{action: String}],
+    followupActions: [ followupActions ],
     wouldRecommend: { type: String, required: true },
     advice: String,
     gender: { type: String, required: true },
@@ -17,7 +17,8 @@ const reportSchema = new Schema({
     age: Number,
     wage: String,
     email: { type: String, required: true },
-    name: String 
+    sexualOrientation: { type: String, required: true },
+    name: String
 });
 
 module.exports = mongoose.model('Report', reportSchema);
