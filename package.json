@@ -9,6 +9,7 @@
   "author": "Eu Tambem",
   "license": "MIT",
   "dependencies": {
+    "aws-sdk": "^2.344.0",
     "aws-serverless-express": "^3.3.5",
     "body-parser": "^1.18.3",
     "consign": "^0.1.6",
