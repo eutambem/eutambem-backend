@@ -11,6 +11,7 @@ module.exports = function() {
     consing({cwd: 'app', verbose: false})
         .include('routes')
         .then('db')
+        .then('controllers')
         .into(app);
 
     return app;
