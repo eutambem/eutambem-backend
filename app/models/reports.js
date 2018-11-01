@@ -16,9 +16,9 @@ const reportSchema = new Schema({
     skinColor: { type: String, required: true },
     age: Number,
     wage: String,
-    email: { type: String, required: true },
+    email: { type: String, required: true, select: false },
     sexualOrientation: { type: String, required: true },
-    name: String
+    name: { type: String, select: false },
 });
 
 module.exports = mongoose.model('Report', reportSchema);
