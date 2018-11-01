@@ -23,6 +23,8 @@ jobs:
 
       - run: yarn test
 
+      - run: yarn lint
+
       - run: zip -r eutambem.zip .
       - persist_to_workspace:
           root: .
