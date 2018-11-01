@@ -1,15 +1,12 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const establishmentSchema = new Schema({ value: String, label: String });
-const followupActions = new Schema({ action: String });
-
 const reportSchema = new Schema({
-    establishment: { type: establishmentSchema, required: true },
+    establishment: { type: { value: String, label: String }, required: true },
     harassmentType: { type: String, required: true },
     description: { type: String, required: true },
     date: { type: Date, required: true },
-    followupActions: [ followupActions ],
+    followupActions: [ String ],
     wouldRecommend: { type: String, required: true },
     advice: String,
     gender: { type: String, required: true },
