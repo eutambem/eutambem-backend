@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/node:8.10
-    
+
     working_directory: ~/repo
 
     steps:
@@ -20,7 +20,9 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-        
+
+      - run: yarn test
+
       - run: zip -r eutambem.zip .
       - persist_to_workspace:
           root: .
