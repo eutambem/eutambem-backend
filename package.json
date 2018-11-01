@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint --ext .js ."
   },
   "repository": "git@github.com:eutambem/eutambem-backend.git",
   "author": "Eu Tambem",
@@ -20,6 +21,9 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "jest": "^23.6.0",
     "node-ses": "^2.1.0",
     "sinon": "^6.3.5",

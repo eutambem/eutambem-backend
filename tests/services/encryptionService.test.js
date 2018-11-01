@@ -1,12 +1,12 @@
-const encryptionService = require('../../app/services/encryptionService');
 const sinon = require('sinon');
 const AWS = require('aws-sdk');
+const encryptionService = require('../../app/services/encryptionService');
 
 describe('encryptionService', () => {
   describe('encrypt', async () => {
     const { encrypt } = encryptionService;
 
-    let kmsStub = sinon.stub(AWS, 'KMS');
+    const kmsStub = sinon.stub(AWS, 'KMS');
 
     beforeEach(() => {
       delete process.env.KMS_KEY_ALIAS;
@@ -28,8 +28,8 @@ describe('encryptionService', () => {
     it('throws encryption error if kms encryption fails for any reason', async () => {
       kmsStub.returns({
         encrypt: () => ({
-          promise: () => Promise.reject('arbitrary kms error'),
-        })
+          promise: () => Promise.reject(new Error('arbitrary kms error')),
+        }),
       });
 
       await expect(encrypt('teste')).rejects.toMatchObject({
@@ -41,9 +41,9 @@ describe('encryptionService', () => {
       kmsStub.returns({
         encrypt: () => ({
           promise: () => Promise.resolve({
-            CiphertextBlob: Buffer.from('encryptedAndEncodedValue@','base64'),
+            CiphertextBlob: Buffer.from('encryptedAndEncodedValue@', 'base64'),
           }),
-        })
+        }),
       });
       expect(await encrypt('test')).toEqual('encryptedAndEncodedValue');
     });
@@ -52,7 +52,7 @@ describe('encryptionService', () => {
   describe('encryptUserData', async () => {
     const { encryptUserData } = encryptionService;
 
-    let encryptStub = sinon.stub(encryptionService, 'encrypt');
+    const encryptStub = sinon.stub(encryptionService, 'encrypt');
 
     const report = {
       email: 'marielle@elenao.com',

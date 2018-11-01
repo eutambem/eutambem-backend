@@ -4,17 +4,17 @@ const kms = () => new AWS.KMS();
 
 module.exports.encrypt = async (data) => {
   const kmsKeyAlias = process.env.KMS_KEY_ALIAS;
-  if (kmsKeyAlias === undefined) throw new Error("No KMS key inforned. Please set KMS_KEY_ALIAS env variable.");
+  if (kmsKeyAlias === undefined) throw new Error('No KMS key inforned. Please set KMS_KEY_ALIAS env variable.');
 
-  var params = {
+  const params = {
     KeyId: kmsKeyAlias,
     Plaintext: data,
   };
   try {
-    result = await kms().encrypt(params).promise();
-    return Buffer.from(result.CiphertextBlob).toString("base64");
-  } catch(err) {
-    throw new Error("Encryption error");
+    const result = await kms().encrypt(params).promise();
+    return Buffer.from(result.CiphertextBlob).toString('base64');
+  } catch (err) {
+    throw new Error('Encryption error');
   }
 };
 

@@ -1,3 +1,3 @@
-module.exports = app => {
-    app.get('/health-check', (req, res) => res.json({status : 'It\'s alive'}));
-}
+module.exports = (app) => {
+  app.get('/health-check', (req, res) => res.json({ status: 'It\'s alive' }));
+};
