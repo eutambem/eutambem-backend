@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const ses = require('node-ses');
+const Report = require('../models/reports');
 
 class EmailVerificationService {
   constructor(options = {}) {
@@ -55,7 +56,7 @@ class EmailVerificationService {
         return;
       }
 
-      this.db.collection('report').findOne({ _id: tokenObj.report_id }, (findError, report) => {
+      Report.findById(tokenObj.report_id, (findError, report) => {
         if (findError || !report) {
           callback(findError || 'Report not found');
           return;
@@ -65,13 +66,8 @@ class EmailVerificationService {
     });
   }
 
-  updateReportAsVerified(report, callback) {
-    this.db.collection('report').updateOne(
-      { _id: report._id },
-      { $set: { emailVerified: true } },
-      { },
-      callback,
-    );
+  updateReportAsVerified(report, callback) { // eslint-disable-line class-methods-use-this
+    Report.findByIdAndUpdate(report._id, { emailVerified: true }, { }, callback);
   }
 
   saveToken(token, report, callback) {

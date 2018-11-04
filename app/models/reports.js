@@ -17,6 +17,7 @@ const reportSchema = new Schema({
   email: { type: String, required: true, select: false },
   sexualOrientation: { type: String, required: true },
   name: { type: String, select: false },
+  emailVerified: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model('Report', reportSchema);
