@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const { ObjectID } = mongoose.mongo;
 const EmailVerificationService = require('../../app/services/emailVerificationService');
+const Report = require('../../app/models/reports');
 
 describe('EmailVerificationService', () => {
   let mockClient;
@@ -100,15 +101,13 @@ describe('EmailVerificationService', () => {
         findOne: jest.fn((params, findCallback) => {
           if (params.token === 'abc123') {
             findCallback(null, mockTokenObject);
-            return;
-          }
-          if (params._id === report._id) {
-            findCallback(null, report);
           }
         }),
         updateOne: jest.fn((filter, update, options, updateCallback) => { updateCallback(null); }),
         deleteOne: jest.fn((filter, deleteCallback) => { deleteCallback(null); }),
       };
+      Report.findById = jest.fn((id, findCallback) => findCallback(null, report));
+      Report.findByIdAndUpdate = jest.fn((id, update, options, updateCallback) => updateCallback(null));
     });
 
     it('should get the report by the verification token', () => {
@@ -116,8 +115,8 @@ describe('EmailVerificationService', () => {
 
       expect(mockDb.collection).toBeCalledWith('validation_token');
       expect(mockDbCollection.findOne).toBeCalledWith({ token: 'abc123' }, expect.anything());
-      expect(mockDb.collection).toBeCalledWith('report');
-      expect(mockDbCollection.findOne).toBeCalledWith({ _id: report._id }, expect.anything());
+
+      expect(Report.findById).toBeCalledWith(report._id, expect.anything());
       expect(callback).toBeCalledWith(null, report, mockTokenObject);
     });
 
@@ -149,16 +148,13 @@ describe('EmailVerificationService', () => {
       mockDbCollection.findOne = jest.fn((params, findCallback) => {
         if (params.token === 'abc123') {
           findCallback(null, mockTokenObject);
-          return;
-        }
-        if (params._id === report._id) {
-          findCallback('error');
         }
       });
+      Report.findById = jest.fn((id, findCallback) => findCallback('error'));
 
       service.verify('abc123', callback);
 
-      expect(mockDbCollection.updateOne).not.toBeCalled();
+      expect(Report.findByIdAndUpdate).not.toBeCalled();
       expect(mockDbCollection.deleteOne).not.toBeCalled();
       expect(callback).toBeCalledWith('error');
     });
@@ -167,16 +163,13 @@ describe('EmailVerificationService', () => {
       mockDbCollection.findOne = jest.fn((params, findCallback) => {
         if (params.token === 'abc123') {
           findCallback(null, mockTokenObject);
-          return;
-        }
-        if (params._id === report._id) {
-          findCallback(null, null);
         }
       });
+      Report.findById = jest.fn((id, findCallback) => findCallback(null, null));
 
       service.verify('abc123', callback);
 
-      expect(mockDbCollection.updateOne).not.toBeCalled();
+      expect(Report.findByIdAndUpdate).not.toBeCalled();
       expect(mockDbCollection.deleteOne).not.toBeCalled();
       expect(callback).toBeCalledWith('Report not found');
     });
@@ -184,10 +177,9 @@ describe('EmailVerificationService', () => {
     it('should update the report with the email verified parameter', () => {
       service.verify('abc123', callback);
 
-      expect(mockDb.collection).toBeCalledWith('report');
-      expect(mockDbCollection.updateOne).toBeCalledWith(
-        { _id: report._id },
-        { $set: { emailVerified: true } },
+      expect(Report.findByIdAndUpdate).toBeCalledWith(
+        report._id,
+        { emailVerified: true },
         expect.anything(),
         expect.anything(),
       );
