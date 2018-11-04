@@ -20,7 +20,7 @@ module.exports.newReport = (req, res) => {
   const dbo = req.app.locals.dbs;
 
   encryptUserData(reportObj).then((encryptedReport) => {
-    Report.create(encryptedReport, (errorSaving, result) => {
+    Report.create({ ...encryptedReport, emailVerified: false }, (errorSaving, result) => {
       if (errorSaving) throw errorSaving;
       const report = { ...reportObj, _id: result._id };
       const emailService = new EmailVerificationService({ db: dbo, baseURL: getBaseAPIURL(req) });
