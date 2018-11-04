@@ -107,7 +107,9 @@ describe('EmailVerificationService', () => {
         deleteOne: jest.fn((filter, deleteCallback) => { deleteCallback(null); }),
       };
       Report.findById = jest.fn((id, findCallback) => findCallback(null, report));
-      Report.findByIdAndUpdate = jest.fn((id, update, options, updateCallback) => updateCallback(null));
+      Report.findByIdAndUpdate = jest.fn(
+        (id, update, options, updateCallback) => updateCallback(null),
+      );
     });
 
     it('should get the report by the verification token', () => {
