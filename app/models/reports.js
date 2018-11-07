@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
+const { ObjectId } = mongoose.Schema.Types;
 
 const reportSchema = new Schema({
   establishment: { type: { value: String, label: String }, required: true },
@@ -21,3 +22,11 @@ const reportSchema = new Schema({
 });
 
 module.exports = mongoose.model('Report', reportSchema);
+
+const validationTokenSchema = new Schema({
+  reportId: { type: ObjectId, required: true },
+  token: { type: String, required: true },
+  date: { type: Date, required: true },
+}, { collection: 'validation_tokens' });
+
+module.exports.ValidationToken = mongoose.model('ValidationToken', validationTokenSchema);
