@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const { ObjectID } = mongoose.mongo;
 const EmailVerificationService = require('../../app/services/emailVerificationService');
 const Report = require('../../app/models/reports');
+const { ValidationToken } = require('../../app/models/reports');
 
 describe('EmailVerificationService', () => {
   let mockClient;
   let mockEmailDriver;
   let mockDb;
-  let mockDbCollection;
   let service;
   let report;
   let callback;
@@ -19,14 +19,13 @@ describe('EmailVerificationService', () => {
 
     mockClient = { sendEmail: jest.fn((options, sendCallback) => { sendCallback(null); }) };
     mockEmailDriver = { createClient: jest.fn(() => mockClient) };
-    mockDbCollection = { insertOne: jest.fn((doc, insertCallback) => { insertCallback(null); }) };
-    mockDb = { collection: jest.fn(() => mockDbCollection) };
+    ValidationToken.create = jest.fn((doc, createCallback) => createCallback(null, doc));
     service = new EmailVerificationService({ emailDriver: mockEmailDriver, db: mockDb, baseURL: 'https://eutambem.org' });
     report = { _id: ObjectID('5bbe570e06bbc0e1354679a5'), email: 'user@example.com' };
     callback = jest.fn();
   });
 
-  it('should send verification email with the correct parameters', () => {
+  it('should send verification email with the correct parameters if token was saved', () => {
     service.sendVerificationEmail(report, callback);
 
     expect(mockEmailDriver.createClient).toBeCalled();
@@ -39,7 +38,7 @@ describe('EmailVerificationService', () => {
   });
 
   it('should not send verification email if could not save token', () => {
-    mockDbCollection = { insertOne: jest.fn((doc, insertCallback) => { insertCallback('db_error'); }) };
+    ValidationToken.create = jest.fn((doc, createCallback) => createCallback('db_error'));
 
     service.sendVerificationEmail(report, callback);
 
@@ -66,9 +65,8 @@ describe('EmailVerificationService', () => {
 
     service.sendVerificationEmail(report, callback);
 
-    expect(mockDb.collection).toBeCalledWith('validation_token');
-    expect(mockDbCollection.insertOne).toBeCalledWith({
-      report_id: ObjectID('5bbe570e06bbc0e1354679a5'),
+    expect(ValidationToken.create).toBeCalledWith({
+      reportId: ObjectID('5bbe570e06bbc0e1354679a5'),
       token,
       date: new Date(1539197013420),
     }, expect.anything());
@@ -87,25 +85,21 @@ describe('EmailVerificationService', () => {
     expect(email.message).toContain(`https://eutambem.org/verify?token=${token}`);
   });
 
-  // verification
   describe('When verifying a token', () => {
     let mockTokenObject;
     beforeEach(() => {
       mockTokenObject = {
         _id: ObjectID('5bbe56ef82857ee0f145be32'),
-        report_id: report._id,
+        reportId: report._id,
         token: 'abc123',
         date: new Date(1539197013420),
       };
-      mockDbCollection = {
-        findOne: jest.fn((params, findCallback) => {
-          if (params.token === 'abc123') {
-            findCallback(null, mockTokenObject);
-          }
-        }),
-        updateOne: jest.fn((filter, update, options, updateCallback) => { updateCallback(null); }),
-        deleteOne: jest.fn((filter, deleteCallback) => { deleteCallback(null); }),
-      };
+      ValidationToken.findOne = jest.fn((params, findCallback) => {
+        if (params.token === 'abc123') {
+          findCallback(null, mockTokenObject);
+        }
+      });
+      ValidationToken.deleteOne = jest.fn((filter, deleteCallback) => { deleteCallback(null); });
       Report.findById = jest.fn((id, findCallback) => findCallback(null, report));
       Report.findByIdAndUpdate = jest.fn(
         (id, update, options, updateCallback) => updateCallback(null),
@@ -115,39 +109,38 @@ describe('EmailVerificationService', () => {
     it('should get the report by the verification token', () => {
       service.getReportFromToken('abc123', callback);
 
-      expect(mockDb.collection).toBeCalledWith('validation_token');
-      expect(mockDbCollection.findOne).toBeCalledWith({ token: 'abc123' }, expect.anything());
+      expect(ValidationToken.findOne).toBeCalledWith({ token: 'abc123' }, expect.anything());
 
       expect(Report.findById).toBeCalledWith(report._id, expect.anything());
       expect(callback).toBeCalledWith(null, report, mockTokenObject);
     });
 
     it('should return an error when there is an error finding the verification token', () => {
-      mockDbCollection.findOne = jest.fn((params, findCallback) => {
+      ValidationToken.findOne = jest.fn((params, findCallback) => {
         if (params.token === 'abc123') findCallback('error');
       });
 
       service.verify('abc123', callback);
 
-      expect(mockDbCollection.updateOne).not.toBeCalled();
-      expect(mockDbCollection.deleteOne).not.toBeCalled();
+      expect(Report.findByIdAndUpdate).not.toBeCalled();
+      expect(ValidationToken.deleteOne).not.toBeCalled();
       expect(callback).toBeCalledWith('error');
     });
 
     it('should return an error when the verification token does not exist', () => {
-      mockDbCollection.findOne = jest.fn((params, findCallback) => {
+      ValidationToken.findOne = jest.fn((params, findCallback) => {
         if (params.token === 'abc123') findCallback(null, null);
       });
 
       service.verify('abc123', callback);
 
-      expect(mockDbCollection.updateOne).not.toBeCalled();
-      expect(mockDbCollection.deleteOne).not.toBeCalled();
+      expect(Report.findByIdAndUpdate).not.toBeCalled();
+      expect(ValidationToken.deleteOne).not.toBeCalled();
       expect(callback).toBeCalledWith('Validation token not found');
     });
 
     it('should return an error when there is an error finding the report', () => {
-      mockDbCollection.findOne = jest.fn((params, findCallback) => {
+      ValidationToken.findOne = jest.fn((params, findCallback) => {
         if (params.token === 'abc123') {
           findCallback(null, mockTokenObject);
         }
@@ -157,12 +150,12 @@ describe('EmailVerificationService', () => {
       service.verify('abc123', callback);
 
       expect(Report.findByIdAndUpdate).not.toBeCalled();
-      expect(mockDbCollection.deleteOne).not.toBeCalled();
+      expect(ValidationToken.deleteOne).not.toBeCalled();
       expect(callback).toBeCalledWith('error');
     });
 
     it('should return an error when it cannot find the report', () => {
-      mockDbCollection.findOne = jest.fn((params, findCallback) => {
+      ValidationToken.findOne = jest.fn((params, findCallback) => {
         if (params.token === 'abc123') {
           findCallback(null, mockTokenObject);
         }
@@ -172,7 +165,7 @@ describe('EmailVerificationService', () => {
       service.verify('abc123', callback);
 
       expect(Report.findByIdAndUpdate).not.toBeCalled();
-      expect(mockDbCollection.deleteOne).not.toBeCalled();
+      expect(ValidationToken.deleteOne).not.toBeCalled();
       expect(callback).toBeCalledWith('Report not found');
     });
 
@@ -191,8 +184,7 @@ describe('EmailVerificationService', () => {
     it('should delete the verification token', () => {
       service.verify('abc123', callback);
 
-      expect(mockDb.collection).toBeCalledWith('validation_token');
-      expect(mockDbCollection.deleteOne).toBeCalledWith(
+      expect(ValidationToken.deleteOne).toBeCalledWith(
         { _id: mockTokenObject._id },
         expect.anything(),
       );

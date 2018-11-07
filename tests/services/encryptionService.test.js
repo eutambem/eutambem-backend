@@ -41,7 +41,7 @@ describe('encryptionService', () => {
       kmsStub.returns({
         encrypt: () => ({
           promise: () => Promise.resolve({
-            CiphertextBlob: Buffer.from('encryptedAndEncodedValue@', 'base64'),
+            CiphertextBlob: Buffer.from('encryptedAndEncodedValue', 'base64'),
           }),
         }),
       });

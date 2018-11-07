@@ -1,11 +1,11 @@
 const crypto = require('crypto');
 const ses = require('node-ses');
 const Report = require('../models/reports');
+const { ValidationToken } = require('../models/reports');
 
 class EmailVerificationService {
   constructor(options = {}) {
     this.emailDriver = options.emailDriver || ses;
-    this.db = options.db;
     this.baseURL = options.baseURL;
     this.from = `EuTambem <${process.env.EMAIL_FROM_ADDRESS}>`;
   }
@@ -49,14 +49,14 @@ class EmailVerificationService {
     });
   }
 
-  getReportFromToken(token, callback) {
-    this.db.collection('validation_token').findOne({ token }, (err, tokenObj) => {
+  getReportFromToken(token, callback) { // eslint-disable-line class-methods-use-this
+    ValidationToken.findOne({ token }, (err, tokenObj) => {
       if (err || !tokenObj) {
         callback(err || 'Validation token not found');
         return;
       }
 
-      Report.findById(tokenObj.report_id, (findError, report) => {
+      Report.findById(tokenObj.reportId, (findError, report) => {
         if (findError || !report) {
           callback(findError || 'Report not found');
           return;
@@ -70,16 +70,16 @@ class EmailVerificationService {
     Report.findByIdAndUpdate(report._id, { emailVerified: true }, { }, callback);
   }
 
-  saveToken(token, report, callback) {
-    this.db.collection('validation_token').insertOne({
-      report_id: report._id,
+  saveToken(token, report, callback) { // eslint-disable-line class-methods-use-this
+    ValidationToken.create({
+      reportId: report._id,
       token,
       date: new Date(Date.now()),
     }, callback);
   }
 
-  removeToken(token, callback) {
-    this.db.collection('validation_token').deleteOne({ _id: token._id }, callback);
+  removeToken(token, callback) { // eslint-disable-line class-methods-use-this
+    ValidationToken.deleteOne({ _id: token._id }, callback);
   }
 
   createToken(report) { // eslint-disable-line class-methods-use-this
