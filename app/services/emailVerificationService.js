@@ -3,93 +3,85 @@ const ses = require('node-ses');
 const Report = require('../models/reports');
 const { ValidationToken } = require('../models/reports');
 
-class EmailVerificationService {
-  constructor(options = {}) {
-    this.emailDriver = options.emailDriver || ses;
-    this.baseURL = options.baseURL;
-    this.from = `EuTambem <${process.env.EMAIL_FROM_ADDRESS}>`;
-  }
+const createToken = (report) => {
+  const tokenValue = report._id + Date.now();
+  return crypto.createHash('sha256').update(tokenValue, 'utf8').digest('hex');
+};
 
-  sendVerificationEmail(report, callback) {
-    const to = report.email;
-    const { from } = this;
-    const token = this.createToken(report);
-    const verificationURL = this.verificationURL(token);
+const verificationURL = (token, baseURL) => `${baseURL}/verify?token=${token}`;
 
-    this.saveToken(token, report, (err) => {
-      if (err) {
-        callback(err);
-        return;
-      }
+const saveToken = (token, report, callback) => {
+  ValidationToken.create({
+    reportId: report._id,
+    token,
+    date: new Date(Date.now()),
+  }, callback);
+};
 
-      this.emailDriver.createClient().sendEmail({
-        to,
-        from,
-        subject: 'Verifique seu endereço de e-mail',
-        message: `Olá,<br><br>Obrigado por enviar seu relato.<br><br>Para evitarmos spam, pedimos que por favor verifique seu email clicando <a href="${verificationURL}">aqui</a>.<br><br>Equipe EuTambem`,
-      }, callback);
-    });
-  }
+const sendVerificationEmail = (report, callback, options = {}) => {
+  const emailDriver = options.emailDriver || ses;
+  const { baseURL } = options;
+  const to = report.email;
+  const from = `EuTambem <${process.env.EMAIL_FROM_ADDRESS}>`;
+  const token = createToken(report);
 
-  verify(token, callback) {
-    this.getReportFromToken(token, (err, report, tokenObj) => {
-      if (err) {
-        callback(err);
-        return;
-      }
+  saveToken(token, report, (err) => {
+    if (err) {
+      callback(err);
+      return;
+    }
 
-      this.updateReportAsVerified(report, (updateError) => {
-        if (updateError) {
-          callback(updateError);
-          return;
-        }
-
-        this.removeToken(tokenObj, callback);
-      });
-    });
-  }
-
-  getReportFromToken(token, callback) { // eslint-disable-line class-methods-use-this
-    ValidationToken.findOne({ token }, (err, tokenObj) => {
-      if (err || !tokenObj) {
-        callback(err || 'Validation token not found');
-        return;
-      }
-
-      Report.findById(tokenObj.reportId, (findError, report) => {
-        if (findError || !report) {
-          callback(findError || 'Report not found');
-          return;
-        }
-        callback(findError, report, tokenObj);
-      });
-    });
-  }
-
-  updateReportAsVerified(report, callback) { // eslint-disable-line class-methods-use-this
-    Report.findByIdAndUpdate(report._id, { emailVerified: true }, { }, callback);
-  }
-
-  saveToken(token, report, callback) { // eslint-disable-line class-methods-use-this
-    ValidationToken.create({
-      reportId: report._id,
-      token,
-      date: new Date(Date.now()),
+    emailDriver.createClient().sendEmail({
+      to,
+      from,
+      subject: 'Verifique seu endereço de e-mail',
+      message: `Olá,<br><br>Obrigado por enviar seu relato.<br><br>Para evitarmos spam, pedimos que por favor verifique seu email clicando <a href="${verificationURL(token, baseURL)}">aqui</a>.<br><br>Equipe EuTambem`,
     }, callback);
-  }
+  });
+};
 
-  removeToken(token, callback) { // eslint-disable-line class-methods-use-this
-    ValidationToken.deleteOne({ _id: token._id }, callback);
-  }
+const getReportFromToken = (token, callback) => {
+  ValidationToken.findOne({ token }, (err, tokenObj) => {
+    if (err || !tokenObj) {
+      callback(err || 'Validation token not found');
+      return;
+    }
 
-  createToken(report) { // eslint-disable-line class-methods-use-this
-    const tokenValue = report._id + Date.now();
-    return crypto.createHash('sha256').update(tokenValue, 'utf8').digest('hex');
-  }
+    Report.findById(tokenObj.reportId, (findError, report) => {
+      if (findError || !report) {
+        callback(findError || 'Report not found');
+        return;
+      }
+      callback(findError, report, tokenObj);
+    });
+  });
+};
 
-  verificationURL(token) {
-    return `${this.baseURL}/verify?token=${token}`;
-  }
-}
+const updateReportAsVerified = (report, callback) => {
+  Report.findByIdAndUpdate(report._id, { emailVerified: true }, { }, callback);
+};
 
-module.exports = EmailVerificationService;
+const removeToken = (token, callback) => {
+  ValidationToken.deleteOne({ _id: token._id }, callback);
+};
+
+const verify = (token, callback) => {
+  getReportFromToken(token, (err, report, tokenObj) => {
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    updateReportAsVerified(report, (updateError) => {
+      if (updateError) {
+        callback(updateError);
+        return;
+      }
+
+      removeToken(tokenObj, callback);
+    });
+  });
+};
+
+module.exports.sendVerificationEmail = sendVerificationEmail;
+module.exports.verify = verify;

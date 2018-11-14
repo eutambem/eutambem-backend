@@ -1,5 +1,5 @@
 const Report = require('../models/reports');
-const EmailVerificationService = require('../services/emailVerificationService');
+const { sendVerificationEmail } = require('../services/emailVerificationService');
 const { encryptUserData } = require('../services/encryptionService');
 
 function getBaseAPIURL(req) {
@@ -17,19 +17,17 @@ module.exports.allReports = (req, res) => {
 
 module.exports.newReport = (req, res) => {
   const reportObj = req.body;
-  const dbo = req.app.locals.dbs;
 
   encryptUserData(reportObj).then((encryptedReport) => {
     Report.create({ ...encryptedReport, emailVerified: false }, (errorSaving, result) => {
       if (errorSaving) throw errorSaving;
       const report = { ...reportObj, _id: result._id };
-      const emailService = new EmailVerificationService({ db: dbo, baseURL: getBaseAPIURL(req) });
-      emailService.sendVerificationEmail(report, (err) => {
+      sendVerificationEmail(report, (err) => {
         if (err) {
           return res.status(500).json({ error: err });
         }
         return res.status(200).json({ report });
-      });
+      }, { baseURL: getBaseAPIURL(req) });
     });
   }).catch(() => res.status(500).json({ error: 'It was not possible to secure user data at this time' }));
 };

@@ -1,8 +1,4 @@
-const EmailVerificationService = require('../services/emailVerificationService');
-
-function getBaseAPIURL(req) {
-  return `${req.protocol}://${req.get('Host')}`;
-}
+const { verify } = require('../services/emailVerificationService');
 
 module.exports = (app) => {
   const { constants } = app.routes;
@@ -14,12 +10,10 @@ module.exports = (app) => {
   app.get('/report', (req, res) => app.controllers.reports.allReports(req, res));
 
   app.get('/verify', (req, res) => {
-    const dbo = req.app.locals.dbs;
     const { token } = req.query;
-    const emailService = new EmailVerificationService({ db: dbo, baseURL: getBaseAPIURL(req) });
 
     console.log('Verifying with token ', token);
-    emailService.verify(token, (err) => {
+    verify(token, (err) => {
       if (err) {
         console.error(err);
         res.status(500).json({ error: err });
