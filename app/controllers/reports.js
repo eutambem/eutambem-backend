@@ -1,5 +1,5 @@
 const Report = require('../models/reports');
-const { sendVerificationEmail } = require('../services/emailVerificationService');
+const { sendVerificationEmail, verify } = require('../services/emailVerificationService');
 const { encryptUserData } = require('../services/encryptionService');
 
 function getBaseAPIURL(req) {
@@ -30,4 +30,17 @@ module.exports.newReport = (req, res) => {
       }, { baseURL: getBaseAPIURL(req) });
     });
   }).catch(() => res.status(500).json({ error: 'It was not possible to secure user data at this time' }));
+};
+
+module.exports.verify = (req, res) => {
+  const { token } = req.query;
+
+  console.log('Verifying with token ', token);
+  verify(token, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).json({ error: err });
+    }
+    res.json({ message: 'Obrigado por verificar seu e-mail.' });
+  });
 };
